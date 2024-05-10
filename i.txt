@@ -1,0 +1,2 @@
+create index.html  using html. materialize css vanilla js, add navbar, cards, background linier gradent,project title , footer, and make compatiable to the smallest screens 
+

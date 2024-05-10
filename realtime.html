@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Image Model with webcam</title>
+    <style>
+        #imagePreview {
+            display: none;
+        }
+        #videoPreview {
+            display: block;
+            margin: 0 auto;
+            width: 80%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #label-container {
+            margin-top: 20px;
+        }
+        #label-container > div {
+            margin-bottom: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #333;
+        }
+        .progress-container {
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .determinate {
+            height: 100%;
+            background-color: #4caf50;
+        }
+        #chart-container {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        #myChart {
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body style="background-color: aquamarine;">
+    <div><h1 style="margin-left:25%;">Railway Wheel Classification</h1> </div>
+    <hr>
+    <video id="videoPreview" autoplay></video>
+    <br><br>
+    <a href="valueTrain.html" style="margin-left: 40%;">Value Based | </a>
+    <a href="class_main.html">Reload | </a>
+    <a href="login.html">Logout</a>
+    <br><br>
+    
+    <div id="label-container"></div>
+
+    <div id="graph-container"></div>
+
+    <div id="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Data for the chart
+        const data = {
+            labels: ['Dented', 'Rusted', 'Normal'],
+            datasets: [{
+                label: 'CNN VISUALIZATION',
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                data: [82, 87, 84],
+            }]
+        };
+
+        // Configuration options
+        const options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: 12 // Adjust font size here
+                        }
+                    }
+                }
+            }
+        };
+
+        // Create the bar chart
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        const URL = 'https://teachablemachine.withgoogle.com/models/qHHuMU65Y/';
+
+        let model, labelContainer, maxPredictions, graphContainer;
+
+        async function init() {
+            const modelURL = URL + 'model.json';
+            const metadataURL = URL + 'metadata.json';
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            labelContainer = document.getElementById('label-container');
+            graphContainer = document.getElementById('graph-container');
+
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement('div'));
+
+                let progressContainer = document.createElement('div');
+                progressContainer.classList.add('progress-container');
+                let progressBar = document.createElement('div');
+                progressBar.classList.add('progress-bar');
+                progressBar.innerHTML = `<div class="determinate" style="width: 0%;"></div>`;
+                progressContainer.appendChild(progressBar);
+                graphContainer.appendChild(progressContainer);
+            }
+        }
+
+        async function predict() {
+            var video = document.getElementById('videoPreview');
+            const prediction = await model.predict(video, false);
+            for (let i = 0; i < maxPredictions; i++) {
+                let className = prediction[i].className;
+                let probability = prediction[i].probability.toFixed(2);
+                let predictionText;
+                if (probability == 1) {
+                    if (className === "Dented") {
+                        predictionText = "Damaged Wheel - Dented, needs to be changed.";
+                        labelContainer.childNodes[i].innerHTML = `${className}: ${predictionText}`;
+                        let progressBar = graphContainer.childNodes[i].querySelector('.determinate');
+                        progressBar.style.width = `${probability * 100}%`;
+                    } else if (className === "Normal") {
+                        predictionText = "Nice wheels can be used for another 10 years.";
+                        labelContainer.childNodes[i].innerHTML = `${className}: ${predictionText}`;
+                        let progressBar = graphContainer.childNodes[i].querySelector('.determinate');
+                        progressBar.style.width = `${probability * 100}%`;
+                    } else if (className === "Rusted") {
+                        predictionText = "Rusted Wheel, Recommended Time Span 4 - 5 years";
+                        labelContainer.childNodes[i].innerHTML = `${className}: ${predictionText}`;
+                        let progressBar = graphContainer.childNodes[i].querySelector('.determinate');
+                        progressBar.style.width = `${probability * 100}%`;
+                    } else {
+                        predictionText = "Unknown class prediction.";
+                        labelContainer.childNodes[i].innerHTML = ` ${predictionText}`;
+                    }
+                } else {
+                    predictionText = "Unknown class prediction.";
+                    labelContainer.childNodes[i].innerHTML = ` ${predictionText}`;
+                    
+                }
+
+                // if (labelContainer.childNodes.length > i) {
+                //     labelContainer.childNodes[i].innerHTML = `${className}: ${predictionText}`;
+                // }
+                // if (graphContainer.childNodes.length > i) {
+                //     let progressBar = graphContainer.childNodes[i].querySelector('.determinate');
+                //     progressBar.style.width = `${probability * 100}%`;
+                // }
+            }
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        async function startWebcam() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoElement = document.getElementById('videoPreview');
+                videoElement.srcObject = stream;
+            } catch (err) {
+                console.error('Error accessing webcam:', err);
+            }
+        }
+
+        window.onload = function() {
+            startWebcam();
+            init();
+        }
+    </script>
+</body>
+</html>

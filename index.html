@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- CSS -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        nav {
+            background-color: #1976d2; /* Set navigation bar background color */
+            padding: 10px 20px;
+        }
+
+        nav .brand-logo {
+            color: #fff; /* Set brand logo color */
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        nav ul {
+            margin: 0;
+            padding: 0;
+            list-style-type: none;
+            float: right;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: #fff; /* Set navigation link color */
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        h2 {
+            margin-top: 50px;
+            text-align: center;
+            color: #333; /* Set heading color */
+        }
+
+        input[type="email"],
+        input[type="password"],
+        button {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #ccc; /* Set border color */
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #1976d2; /* Set button background color */
+            color: #fff; /* Set button text color */
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1565c0; /* Set button background color on hover */
+        }
+
+        @media screen and (max-width: 600px) {
+            nav ul {
+                display: none;
+            }
+
+            nav .brand-logo {
+                display: block;
+                margin: 0;
+                text-align: center;
+            }
+
+            nav .brand-logo a {
+                color: #fff;
+            }
+
+            .menu-toggle {
+                display: block;
+                color: #fff;
+                font-size: 24px;
+                float: right;
+                cursor: pointer;
+            }
+
+            .menu-toggle:hover {
+                color: #ccc;
+            }
+
+            nav.active ul {
+                display: block;
+                background-color: #1565c0; /* Set background color of dropdown menu */
+                width: 100%;
+                text-align: center;
+                padding-top: 10px;
+            }
+
+            nav.active ul li {
+                display: block;
+                margin: 10px 0;
+            }
+
+            nav.active ul li a {
+                color: #fff;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body style="background-color: aquamarine;">
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo">Railway Wheel Classification</a>
+        </div>
+    </nav>
+
+    <h2>Login</h2>
+    <div id="messageContainer" style="text-align: center;"></div>
+    <input id="email" type="email" class="validate" placeholder="Email">
+    <input id="password" type="password" class="validate" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <h6 style="text-align: center;">New User: <a href="register.html">Click Here</a></h6>
+
+
+    
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>

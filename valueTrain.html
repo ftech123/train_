@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+<style>
+body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif;}
+body, html {
+  height: 100%;
+  color: #000000;
+  background-color: aquamarine;
+  line-height: 1.8;
+}
+label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  button {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+ 
+</style>
+</head>
+<body >
+
+<!-- Navbar (sit on top) -->
+<!-- <div class="w3-top">
+  <div class="w3-bar" id="myNavbar" style="background-color: antiquewhite;">
+    <a href="train.html" class="w3-bar-item w3-button ">Image Detect</a>
+    <a href="valueTrain.html" class="w3-bar-item w3-button "> Value Detect</a>
+    <a href="index.html" class="w3-bar-item w3-button "> Logout</a>
+  </div>
+</div> -->
+
+<div class="w3-content w3-container w3-padding-64" > 
+  <br><br>
+
+        <div class="row">
+          <div class="col s6">
+              <a href="valueTrain.html" class="waves-effect waves-light btn">Value Based</a>
+          </div>
+          <div class="col s6">
+              <a href="class_main.html" class="waves-effect waves-light btn">Image Module</a>
+          </div>
+          <!-- <div class="col s6">
+            <a href="realtime.html" class="waves-effect waves-light btn">Webcam Module</a>
+        </div> -->
+      </div>
+      <hr>
+        <br><br>
+<h2 >Train Wheel Health Predictor</h2>
+
+		
+<form id="predictionForm">
+  <label for="trainType">Type of Train:</label><br>
+  <select id="trainType" name="trainType">
+    <option value="Passenger">Passenger</option>
+    <option value="Freight">Freight</option>
+    <option value="High-Speed">High-Speed</option>
+  </select><br><br>
+
+  <label for="loadType">Type of Load:</label><br>
+  <input type="radio" id="loadType1" name="loadType" value="Passenger" style="display: inline-block;">
+  <label for="loadType1" style="display: inline-block;">Passenger</label>
+  <input type="radio" id="loadType2" name="loadType" value="Freight" style="display: inline-block;">
+  <label for="loadType2" style="display: inline-block;">Freight</label>
+  <input type="radio" id="loadType3" name="loadType" value="Cargo" style="display: inline-block;">
+  <label for="loadType3" style="display: inline-block;">Cargo</label><br><br>
+
+  <label for="usage">Usage (hours/day):</label><br>
+  <input type="number" id="usage" name="usage" min="0" max="24" step="1" value="8"><br><br>
+
+  <label for="environment">Environment:</label><br>
+  <select id="environment" name="environment">
+    <option value="Urban">Urban</option>
+    <option value="Suburban">Suburban</option>
+    <option value="Rural">Rural</option>
+    <option value="Industrial">Industrial</option>
+  </select><br><br>
+
+  <label for="accidents">Accidents:</label><br>
+  <input type="number" id="accidents" name="accidents" min="0" step="1" value="0"><br><br>
+
+  <button type="button" onclick="predict()" style="background-color: #000000;">Predict</button>
+</form>
+
+<p id="predictionResult"></p>
+</div>
+<script>
+function predict() {
+  var trainType = document.getElementById("trainType").value;
+  var loadType = document.querySelector('input[name="loadType"]:checked').value;
+  var usage = parseInt(document.getElementById("usage").value);
+  var environment = document.getElementById("environment").value;
+  var accidents = parseInt(document.getElementById("accidents").value);
+
+  // Perform a basic prediction based on the inputs
+  var prediction = basicPrediction(loadType, accidents);
+
+  // Calculate recommended time span based on usage
+  var recommendedTimeSpan = calculateRecommendedTimeSpan(usage);
+
+  // Determine health consideration based on prediction
+  var healthConsideration = determineHealthConsideration(prediction);
+
+  document.getElementById("predictionResult").innerText = 
+    "Prediction: " + prediction + "\n" +
+    "Recommended Time Span: " + recommendedTimeSpan + "\n" +
+    "Health Consideration: " + healthConsideration;
+}
+
+function basicPrediction(loadType, accidents) {
+  if (loadType === "Freight" && accidents > 0) {
+    return "Damaged";
+  } else if (loadType === "Freight" && accidents === 0) {
+    return "Rusted";
+  } else {
+    return "Normal";
+  }
+}
+
+function calculateRecommendedTimeSpan(usage) {
+  var usagePerYear = usage * 365; // Convert usage from hours/day to hours/year
+  if (usagePerYear < 1460) { // Less than 4 years
+    return "Low (Less than 4 years)";
+  } else if (usagePerYear >= 1460 && usagePerYear < 4380) { // Between 4 and 12 years
+    return "Medium (4 to 12 years)";
+  } else { // More than 12 years
+    return "High (More than 12 years)";
+  }
+}
+
+function determineHealthConsideration(prediction) {
+  switch (prediction) {
+    case "Damaged":
+      return "Immediate maintenance is required to prevent further deterioration.";
+    case "Rusted":
+      return "Rust can weaken the wheel structure and lead to potential failures.";
+    case "Dented":
+      return "Dents may affect the balance and structural integrity of the wheel.";
+    case "Hole":
+      return "Holes can compromise the strength and safety of the wheel.";
+    case "Normal":
+      return "The wheel is in good condition with no significant issues.";
+    default:
+      return "No specific health consideration available.";
+  }
+}
+</script>
+
+</body>
+</html>

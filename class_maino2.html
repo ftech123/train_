@@ -1,0 +1,437 @@
+<html>
+	<head>
+		<title>Image Model with upload</title>
+        <style>
+            #imagePreview {
+                display: block;
+            }
+            #label-container {
+                margin-top: 20px;
+            }
+            #label-container > div {
+                margin-bottom: 10px;
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+                color: #333;
+            }
+            .progress-container {
+                margin-bottom: 10px;
+            }
+            .progress-bar {
+                height: 20px;
+                background-color: #ddd;
+                border-radius: 5px;
+                overflow: hidden;
+            }
+            .determinate {
+                height: 100%;
+                background-color: #4caf50;
+            }
+            #chart-container {
+            max-width: 100%;
+            overflow-x: auto;
+            }
+
+            #myChart {
+            max-width: 100%;
+            margin-bottom: 10px;
+            }
+        </style>
+	</head>
+	<body style="background-color: aquamarine;">
+        <div><h1 style="margin-left:25%;">Railway Wheel Classification</h1> </div>
+        <hr>
+		<img id="imagePreview" style="height: 300px;" />
+		<input id="imageUpload" type="file" style="margin-left: 40%;"/>
+        <br><br>
+        <a href="valueTrain.html" style="margin-left: 40%;">Value Based | </a>
+        <a href="class_main.html">Reload | </a>
+        <a href="login.html">Logout</a>
+        <br><br>
+		
+		<div id="label-container"></div>
+
+        <div id="graph-container"></div>
+
+        <div id="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <div id="accuracy-chart-container">
+          <canvas id="accuracy-chart"></canvas>
+      </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+          // Declare global variables for v1, v2, and v3
+          // let v1 = 0, v2 = 0, v3 = 0;
+      
+          // Data for the chart
+          const data = {
+            labels: ['Dented', 'Rusted', 'Normal'],
+            datasets: [{
+              label: 'CNN VISUALIZATION',
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              data: [v1, v2, v3],
+            }]
+          };
+      
+          // Configuration options
+          const options = {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  font: {
+                    size: 12 // Adjust font size here
+                  }
+                }
+              }
+            }
+          };
+      
+          // Create the bar chart
+          const ctx = document.getElementById('myChart').getContext('2d');
+          const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+          });
+      </script>
+      
+          <script>
+            // Get the canvas element
+            var ctx11 = document.getElementById('accuracy-chart').getContext('2d');
+        
+            // Define data for the chart (example data)
+            var data11 = {
+                labels: ['Precison Score', 'Recall Value', 'F1 Score', 'Accuracy'],
+                datasets: [{
+                    label: 'Accuracy',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    data: [0.85, 0.78, 0.81, 0.90] 
+                }]
+            };
+        
+            // Configure options for the chart
+            var options11 = {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            max: 100 // Set maximum value for y-axis
+                        }
+                    }]
+                }
+            };
+        
+            // Create the chart
+            var accuracyChart = new Chart(ctx11, {
+                type: 'line', // Use a line chart
+                data: data11,
+                options: options11
+            });
+        </script>
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+		<script type="text/javascript">
+            const URL = 'https://teachablemachine.withgoogle.com/models/qHHuMU65Y/';
+
+            let model, labelContainer, maxPredictions, graphContainer;
+
+            async function init() {
+                const modelURL = URL + 'model.json';
+                const metadataURL = URL + 'metadata.json';
+
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                labelContainer = document.getElementById('label-container');
+                graphContainer = document.getElementById('graph-container');
+
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement('div'));
+
+                    let progressContainer = document.createElement('div');
+                    progressContainer.classList.add('progress-container');
+                    let progressBar = document.createElement('div');
+                    progressBar.classList.add('progress-bar');
+                    progressBar.innerHTML = `<div class="determinate" style="width: 0%;"></div>`;
+                    progressContainer.appendChild(progressBar);
+                    graphContainer.appendChild(progressContainer);
+                }
+            }
+
+            async function predict() {
+                var image = document.getElementById('imagePreview');
+                const prediction = await model.predict(image, false);
+                for (let i = 0; i < maxPredictions; i++) {
+                    let className = prediction[i].className;
+                    let probability = prediction[i].probability.toFixed(2);
+                    let predictionText;
+                    if (probability == 1) {
+                        if (className === "Dented") {
+                            predictionText = "Damaged Wheel - Dented, needs to be changed.";
+                            labelContainer.childNodes[i].innerHTML = `${className}: ${predictionText}`;
+                            let progressBar = graphContainer.childNodes[i].querySelector('.determinate');
+                            progressBar.style.width = `${probability * 100}%`;
+                            v1 = 1;
+                            v2 = 0;
+                            v3 = 0;
+                            const data = {
+            labels: ['Dented', 'Rusted', 'Normal'],
+            datasets: [{
+              label: 'CNN VISUALIZATION',
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              data: [v1, v2, v3],
+            }]
+          };
+      
+          // Configuration options
+          const options = {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  font: {
+                    size: 12 // Adjust font size here
+                  }
+                }
+              }
+            }
+          };
+      
+          // Create the bar chart
+          const ctx = document.getElementById('myChart').getContext('2d');
+          const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+          });
+                        } else if (className === "Normal") {
+                            predictionText = "Nice wheels can be used for another 10 years.";
+                            labelContainer.childNodes[i].innerHTML = `${className}: ${predictionText}`;
+                            let progressBar = graphContainer.childNodes[i].querySelector('.determinate');
+                            progressBar.style.width = `${probability * 100}%`;
+                            v1 = 0;
+                            v2 = 0;
+                            v3 = 1;
+                            const data = {
+            labels: ['Dented', 'Rusted', 'Normal'],
+            datasets: [{
+              label: 'CNN VISUALIZATION',
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              data: [v1, v2, v3],
+            }]
+          };
+      
+          // Configuration options
+          const options = {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  font: {
+                    size: 12 // Adjust font size here
+                  }
+                }
+              }
+            }
+          };
+      
+          // Create the bar chart
+          const ctx = document.getElementById('myChart').getContext('2d');
+          const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+          });
+                        } else if (className === "Rusted") {
+                            predictionText = "Rusted Wheel, Recommended Time Span 4 - 5 years";
+                            labelContainer.childNodes[i].innerHTML = `${className}: ${predictionText}`;
+                            let progressBar = graphContainer.childNodes[i].querySelector('.determinate');
+                            progressBar.style.width = `${probability * 100}%`;
+                            v1 = 0;
+                            v2 = 1;
+                            v3 = 0;
+                            const data = {
+            labels: ['Dented', 'Rusted', 'Normal'],
+            datasets: [{
+              label: 'CNN VISUALIZATION',
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              data: [v1, v2, v3],
+            }]
+          };
+      
+          // Configuration options
+          const options = {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  font: {
+                    size: 12 // Adjust font size here
+                  }
+                }
+              }
+            }
+          };
+      
+          // Create the bar chart
+          const ctx = document.getElementById('myChart').getContext('2d');
+          const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+          });
+                        } else {
+                            predictionText = "Unknown class prediction.";
+                            labelContainer.childNodes[i].innerHTML = ` ${predictionText}`;
+                            v1 = 0;
+                            v2 = 0;
+                            v3 = 0;
+                            const data = {
+            labels: ['Dented', 'Rusted', 'Normal'],
+            datasets: [{
+              label: 'CNN VISUALIZATION',
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              data: [v1, v2, v3],
+            }]
+          };
+      
+          // Configuration options
+          const options = {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  font: {
+                    size: 12 // Adjust font size here
+                  }
+                }
+              }
+            }
+          };
+      
+          // Create the bar chart
+          const ctx = document.getElementById('myChart').getContext('2d');
+          const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+          });
+                        }
+                    } else {
+                        predictionText = "Unknown class prediction.";
+                        labelContainer.childNodes[i].innerHTML = ` ${predictionText}`;
+                        v1 = 0;
+                        v2 = 0;
+                        v3 = 0;
+                        const data = {
+            labels: ['Dented', 'Rusted', 'Normal'],
+            datasets: [{
+              label: 'CNN VISUALIZATION',
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              data: [v1, v2, v3],
+            }]
+          };
+      
+          // Configuration options
+          const options = {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  font: {
+                    size: 12 // Adjust font size here
+                  }
+                }
+              }
+            }
+          };
+      
+          // Create the bar chart
+          const ctx = document.getElementById('myChart').getContext('2d');
+          const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+          });
+                    }
+
+                    // if (labelContainer.childNodes.length > i) {
+                    //     labelContainer.childNodes[i].innerHTML = `${className}: ${predictionText}`;
+                    // }
+                    // if (graphContainer.childNodes.length > i) {
+                    //     let progressBar = graphContainer.childNodes[i].querySelector('.determinate');
+                    //     progressBar.style.width = `${probability * 100}%`;
+                    // }
+                
+                // Update the chart with new values
+                myChart.data.datasets[0].data = [v1, v2, v3];
+                myChart.update();
+                    }
+            }
+		</script>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script type="text/javascript">
+			function readURL(input) {
+				if (input.files && input.files[0]) {
+					var reader = new FileReader();
+					reader.onload = function (e) {
+						$('#imagePreview').attr('src', e.target.result);
+						$('#imagePreview').hide();
+						$('#imagePreview').fadeIn(650);
+					};
+					reader.readAsDataURL(input.files[0]);
+					init().then(() => {
+						predict();
+					});
+				}
+			}
+			$('#imageUpload').change(function () {
+				readURL(this);
+			});
+		</script>
+
+	</body>
+</html>

@@ -1,0 +1,3 @@
+
+
+ register.html using html. materialize css vanilla js add nav bar ,background linier gradent, make compatiable to smallest screenscreate
